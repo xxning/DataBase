@@ -1,0 +1,83 @@
+create table D(food varchar(10),cuisine varchar(15));
+create table I(food varchar(10),ingredient varchar(15),quantity number(3));
+create table C(ingredient varchar(15),quantity number(3),calories number(5));
+insert into D(food,cuisine) values('CA','Chinese');
+insert into D(food,cuisine) values('CB','Chinese');
+insert into D(food,cuisine) values('JA','Japanese');
+insert into D(food,cuisine) values('IA','Indian');
+insert into D(food,cuisine) values('IB','Indian');
+
+insert into I(food,ingredient,quantity) values('CA','beef',30);
+insert into I(food,ingredient,quantity) values('CA','tomato',50);
+insert into I(food,ingredient,quantity) values('CA','cumin',5);
+insert into I(food,ingredient,quantity) values('CB','cumin',10);
+insert into I(food,ingredient,quantity) values('CB','pork',30);
+insert into I(food,ingredient,quantity) values('CB','butter',5);
+insert into I(food,ingredient,quantity) values('CB','rice',15);
+insert into I(food,ingredient,quantity) values('JA','rice',50);
+insert into I(food,ingredient,quantity) values('JA','fish',30);
+insert into I(food,ingredient,quantity) values('JA','butter',16);
+insert into I(food,ingredient,quantity) values('IA','beef',45);
+insert into I(food,ingredient,quantity) values('IA','butter',20);
+insert into I(food,ingredient,quantity) values('IA','rice',30);
+insert into I(food,ingredient,quantity) values('IB','pork',30);
+insert into I(food,ingredient,quantity) values('IB','cumin',10);
+insert into I(food,ingredient,quantity) values('IB','cabbage',20);
+
+insert into C(ingredient,quantity,calories) values('beef',2,500);
+insert into C(ingredient,quantity,calories) values('butter',1,750);
+insert into C(ingredient,quantity,calories) values('cumin',2,35);
+insert into C(ingredient,quantity,calories) values('pork',1,330);
+insert into C(ingredient,quantity,calories) values('rice',10,700);
+insert into C(ingredient,quantity,calories) values('fish',1,180);
+insert into C(ingredient,quantity,calories) values('cabbage',5,50);
+insert into C(ingredient,quantity,calories) values('tomato',1,30);
+
+SELECT food from I where ingredient='butter' AND quantity>16
+SELECT cuisine from D INNER JOIN I ON D.food=I.food where I.ingredient='cumin'
+
+UPDATE I SET quantity = 16 WHERE ingredient = 'butter' AND quantity >16
+
+DELETE from I WHERE food in(
+SELECT food from D WHERE D.cuisine = 'Indian' AND I.ingredient = 'beef'
+)
+
+create table S as(
+select cuisine,ingredient,sum(quantity) as qty
+from D inner join I on (D.food=I.food) group by (cuisine,ingredient) 
+)
+
+create table car as(
+select food,sum(I.quantity*calories/C.quantity) as cara from C INNER JOIN I ON
+(C.ingredient = I.ingredient) group by food 
+ ) 
+
+ select cara from car where food ='CA' 
+
+ create table Cars (license varchar(10), owner varchar(10), model varchar(10));
+ create table motorcycle (license varchar(10), owner varchar(10), model varchar(10));
+ 
+ insert into cars(license,owner,model) values('C011', 'P1','M1');
+ insert into cars(license,owner,model) values('C012', 'P3','M1');
+ insert into cars(license,owner,model) values('C013', 'P4','M3');
+ insert into cars(license,owner,model) values('C014', 'P4','M2');
+ insert into cars(license,owner,model) values('C015', 'P5','M3');
+ insert into motorcycle(license,owner,model) values('M011','P2','M7');
+ insert into motorcycle(license,owner,model) values('M012','P3','M8');
+ insert into motorcycle(license,owner,model) values('M013','P4','M7');
+ insert into motorcycle(license,owner,model) values('M014','P4','M8');
+
+ select owner from cars where owner not in (select owner from motorcycle)
+ select owner from cars where owner in (select owner from motorcycle)
+ select sum(1),owner from cars group by owner
+
+create table Ownership  (
+owner varchar(10),numberofcars number(3),numberofmotorcycles number(3)
+);
+insert into Ownership(owner)
+select owner from cars union select owner from motorcycle group by owner,order by owner;
+update ownership set numberofcars = (select count(license) from cars where ownership.owner=cars.owner),
+numberofmotorcycles = (select count(license) from motorcycle where ownership.owner=motorcycle.owner);
+select * from ownership;
+
+

@@ -1,0 +1,26 @@
+1. Build
+   $ make
+
+2. Usage
+   $ bin/calc -h                # print help
+   $ bin/calc -v                # print version
+   $ bin/calc                   # read statements from stdin, output to stdout
+   $ bin/calc infile            # read from infile
+   $ bin/calc -d dump.dot       # dump AST to dump.dot
+
+3. Files
+   global.cc    # global variables
+   global.hh
+   util.cc      # utility functions 
+   util.hh      # utility marcos
+   lexer.l      # lexer file
+   lexer.cc     # provides yylex()
+   parser.y     # bison file
+   parser.cc    # provides yyparse()
+   tok.hh       # shared statements and definations between yylex and yyparse
+   node.cc      # define dump function of every AST nodes
+   node.hh      # statement of AST nodes and their constructors
+   main.cc      # scans a file with yyarse(), prints reductions, dump AST
+
+========
+Author:Ning Xiao ( xiaoning@mail.ustc.edu.cn )

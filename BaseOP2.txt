@@ -1,0 +1,163 @@
+##PART1:
+####################################
+create table Student(
+  S# varchar(10),
+  Sname varchar(15),
+  age number(3),
+  primary key (S#));
+create table Course(
+  C# varchar(8),
+  cname varchar(15),
+  credit number(2),
+  primary key (C#));
+create table SC(
+  s# varchar(10),
+  c# varchar(8),
+  score number(3),
+  primary key (s#,c#),
+  foreign key (s#) references Student,
+  foreign key (c#) references Course);
+
+
+insert into Student(S#,Sname,age)
+	values('PB13011001','zhang','20');
+insert into Student(S#,Sname,age)
+	values('PB13011002','wang','21');
+insert into Student(S#,Sname,age)
+	values('PB13011003','zhao','20');
+insert into Student(S#,Sname,age)
+	values('PB13011004','li','22');
+insert into Student(S#,Sname,age)
+	values('PB13011005','guo','20');
+
+insert into Course(C#,cname,credit)
+	values('C1','AI','3.5');
+insert into Course(C#,cname,credit)
+	values('C2','DB','3');
+insert into Course(C#,cname,credit)
+	values('C3','CA','3');
+insert into Course(C#,cname,credit)
+	values('C4','SE','3.5');
+
+insert into SC(s#,c#,score)
+	values('PB13011001','C2','80');
+insert into SC(s#,c#,score)
+	values('PB13011002','C2','84');
+insert into SC(s#,c#,score)
+	values('PB13011003','C2','75');
+insert into SC(s#,c#,score)
+	values('PB13011004','C2','91');
+insert into SC(s#,c#,score)
+	values('PB13011005','C2','86');
+
+存储过程实现修改指定学生的学号:
+create or replace procedure AlterStuNo(
+	v_no IN varchar2,v_no_new IN varchar2)
+AS
+varsn varchar(10);
+varname varchar(15);
+varage number(3);
+num number(1);
+BEGIN
+	select S#,Sname,age into varsn,varname,varage from Student
+		where S#=v_no;
+	select count(*) into num from Student
+		where S#=v_no;
+	IF num=0 THEN
+		RETURN ;
+	END IF;
+	insert into Student(S#,Sname,age)
+		values(v_no_new,varname,varage);
+	update SC set s#=v_no_new 
+		where s#=v_no;
+	delete from Student 
+		where S#=v_no;
+END ;
+
+
+call AlterStuNo('PB13011001','PB13011006');
+
+##PART2:
+####################################
+create table SC(
+  s# varchar(10),
+  c# varchar(8),
+  score number(3),
+  primary key (s#,c#),
+  foreign key (s#) references Student,
+  foreign key (c#) references Course);
+create table Dept(
+	D# varchar(5),
+	Dname varchar(15),
+	S_Count number(6),
+	primary key (D#));
+create table Stu(
+	S# varchar(10),
+	Sname varchar(15),
+	age number(3),
+	D# varchar(5),
+	foreign key (D#) references Dept);
+
+插入数据：
+insert into Dept(D#,Dname,S_count)
+  values('D1','CS','2');
+insert into Dept(D#,Dname,S_count)
+  values('D2','PE','1');
+insert into Dept(D#,Dname,S_count)
+  values('D3','PH','1');
+
+insert into Stu(S#,Sname,age,D#)
+  values('PB13011001','zhang','19','D1');
+insert into Stu(S#,Sname,age,D#)
+  values('PB13011002','wang','21','D1');
+insert into Stu(S#,Sname,age,D#)
+  values('PB13011003','zhao','20','D2');
+insert into Stu(S#,Sname,age,D#)
+  values('PB13011004','zheng','20','D3');
+
+触发器实现S_count和学生表中实际人数的一致性:
+create or replace Trigger ConsistentInsert
+After Insert on Stu
+For Each Row
+Declare 
+  a Number:=0;
+Begin 
+  select count(*) into a from Stu
+    where Stu.D#=:new.D#;
+  update Dept set S_count=a
+    where Dept.D#=:new.D#;
+End ;
+
+create or replace Trigger ConsistentInsert
+After Insert on Stu
+For Each Row
+Begin  
+  update Dept set S_count=S_count+1
+    where D#=:new.D#;
+End ;
+
+
+create or replace Trigger ConsistentDelete
+After Delete on Stu
+For Each Row
+Begin 
+  update Dept set S_count=S_count-1
+    where D#=:old.D#;
+End;
+
+create or replace Trigger ConsistentUpdate
+After Update on Stu
+For Each Row
+Begin 
+	update Dept set S_count=S_count-1
+		where D#=:old.D#;
+	update Dept set S_count=S_count+1
+		where D#=:new.D#;
+End;
+
+
+insert into Stu(S#,Sname,age,D#)
+  values('PB13011005','zhu','20','D2');
+
+select * from Dept;
+select * from Stu;

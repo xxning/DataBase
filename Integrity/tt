@@ -1,0 +1,6 @@
+insert into student(22,22,aa);
+insert into student(33,33,bb);
+insert into student(22,22,cc);
+insert into student(44,44,dd);
+
+
